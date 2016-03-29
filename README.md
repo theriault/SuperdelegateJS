@@ -10,7 +10,7 @@ Register a superdelegate:
 ```javascript
 Superdelegate.register(name, eventMap[, data]);
 ```
-`name` is the unique name of the superdelegate to register (which will be delegated through `data-super` in your HTML). `eventMap` is a map of events where the keys are an event type (`click`, `focusout`, `keydown`, etc.), followed by a dash, followed by a subdelegate name (which will be delegated through `data-sub` in your HTML). The values of `eventMap` are the event handlers. The first argument passed to each event handler will be an Event object (see below). Inside the event handlers, `this` will point to the `data-sub` element. `data` is an optional third argument. This value will be exposed to all event handlers through `Event.data`
+`name` is the unique name of the superdelegate to register (which will be delegated through `data-super` in your HTML). `eventMap` is a map of events where the keys are an event type (`click`, `focusout`, `keydown`, etc.), followed by a dash, followed by a subdelegate name (which will be delegated through `data-sub` in your HTML). The values of `eventMap` are the event handlers. The first argument passed to each event handler will be an augmented Event object. Inside the event handlers, `this` will point to the `data-sub` element. `data` is an optional third argument - its value will be exposed to all event handlers through `Event.data`
 
 Example usage:
 ```html
@@ -34,7 +34,7 @@ Superdelegate.register("dismissable", {
 ```
 
 ### Event object
-An Event object will have a few more properties available inside its event handler.
+Each event handler's Event object will be augmented with the following properties.
 
 #### Event.super
 
@@ -44,7 +44,7 @@ An Event object will have a few more properties available inside its event handl
 This will be the 3rd argument of `Superdelegate.register` for the corresponding superdelegate. See the example for `Event.instanceData`
 
 #### Event.instanceData
-`Event.instanceData` will be available if the parent `data-super` element has a `data-id` attribute. You can use this to maintain a separate data object per unique `data-id`. See example below.
+`Event.instanceData` will be available if the parent `data-super` element has a `data-id` attribute. You can use this to maintain a separate data object per unique `data-id`.
 
 Example:
 ```html
@@ -71,9 +71,9 @@ Superdelegate.register("dialog", {
 </script>
 ```
 
-### Superdelegate events
+### Superdelegate event handlers
 
-You can also pass events to be handled by the superdelegate element by omitting the dash and subdelegate name in the event map. Inside these events, `this` will point to the `data-super` element.
+You can also pass event handlers for the superdelegate element itself by omitting the dash and subdelegate name in the event map. Inside these event handlers, `this` will point to the `data-super` element.
 
 Example:
 ```html
