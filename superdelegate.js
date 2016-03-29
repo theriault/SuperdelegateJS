@@ -2,19 +2,19 @@
  * Superdelegate v0.1.0
  * Copyright (c) 2016 Theriault
  */
-;(function (root) {
+;(function (root, doc) {
 	var Superdelegate = {};
 	var eventRegister = {};
 	var modules = {};
-	var options = {"superdelegate": "module", "delegate": "bind"};
+	var options = {"superdelegate": "super", "subdelegate": "sub"};
 	var listener = function (e) {
 		var p = e.target;
-		var delegate = null, delegateAttr = null, superdelegate = null, superdelegateAttr = null;
+		var subdelegate = null, subdelegateAttr = null, superdelegate = null, superdelegateAttr = null;
 		do {
-			if (delegate === null) {
-				delegateAttr = p.getAttribute("data-" + options.delegate);
-				if (delegateAttr) {
-					delegate = p;
+			if (subdelegate === null) {
+				subdelegateAttr = p.getAttribute("data-" + options.subdelegate);
+				if (subdelegateAttr) {
+					subdelegate = p;
 				}
 			}
 			if (superdelegate === null) {
@@ -31,12 +31,12 @@
 		if (superdelegate === null) return;
 		if (!(superdelegateAttr in modules)) return;
 		var mod = modules[superdelegateAttr];
-		if (delegate !== null) {
-			var event_name = e.type + "-" + delegateAttr;
-			e.super = superdelegate;
-			var target = delegate;
+		e.super = superdelegate;
+		if (subdelegate !== null) {
+			var eventName = e.type + "-" + subdelegateAttr;
+			var target = subdelegate;
 		} else {
-			var event_name = e.type;
+			var eventName = e.type;
 			var target = superdelegate;
 		}
 		var id = superdelegate.getAttribute("data-id") || "";
@@ -49,8 +49,8 @@
 		if ("data" in mod) {
 			e.data = mod.data;
 		}
-		if (event_name in mod.handles) {
-			return mod.handles[event_name].call(target, e);
+		if (eventName in mod.handles) {
+			return mod.handles[eventName].call(target, e);
 		}
 	};
 	Superdelegate.option = function (name, value) {
@@ -70,7 +70,7 @@
 			if (i in eventRegister) {
 				eventRegister[i][name] = true;
 			} else {
-				root.jQuery(root.document).on(i + ".superdelegate", listener);
+				doc.addEventListener(i, listener);
 				eventRegister[i] = {};
 				eventRegister[i][name] = true;
 			}
@@ -102,7 +102,7 @@
 					break;
 				}
 				if (!has) {
-					root.jQuery(root.document).off(i + ".superdelegate");
+					doc.removeEventListener(i, listener);
 				}
 			}
 		}
@@ -111,4 +111,4 @@
 	};
 	
 	root.Superdelegate = Superdelegate;
-})(window);
+})(window, document);
