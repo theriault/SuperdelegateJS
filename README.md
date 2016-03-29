@@ -1,62 +1,61 @@
 # SuperdelegateJS
-Super delegation for Javascript. This library requires [jQuery](https://github.com/jquery/jquery).
+Super delegation for Javascript.
 
 ## How to use it
-Include superdelegate.js alongside jQuery:
+Include superdelegate.js:
 ```html
-<script src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
 <script src="superdelegate.js"></script>
 ```
 Register a superdelegate:
 ```javascript
 Superdelegate.register(name, eventMap[, data]);
 ```
-`name` is the unique name of the superdelegate to register (which will be delegated through `data-module` in your HTML). `eventMap` is a map of events where the keys are an event type (`click`, `focusout`, `keydown`, etc.), followed by a dash, followed by a subdelegate name (which will be delegated through `data-bind` in your HTML). The values of `eventMap` are the event handlers. The first argument passed to each event handler will be an extended jQuery Event object (see below). Inside the event handlers, `this` will point to the `data-bind` element. `data` is an optional third argument. This value will be exposed to all event handlers through `Event.data`
+`name` is the unique name of the superdelegate to register (which will be delegated through `data-super` in your HTML). `eventMap` is a map of events where the keys are an event type (`click`, `focusout`, `keydown`, etc.), followed by a dash, followed by a subdelegate name (which will be delegated through `data-sub` in your HTML). The values of `eventMap` are the event handlers. The first argument passed to each event handler will be an Event object (see below). Inside the event handlers, `this` will point to the `data-sub` element. `data` is an optional third argument. This value will be exposed to all event handlers through `Event.data`
 
 Example usage:
 ```html
 <script>
 Superdelegate.register("dismissable", {
   "click-close": function (e) {
-    $(e.super).remove(); // 'e.super' points to the data-module element
+    $(e.super).remove(); // 'e.super' points to the data-super element
     return false;
   },
   "click-alert": function (e) {
-    alert($(this).data("message")); // 'this' points to the data-bind element
+    alert(this.dataset.message); // 'this' points to the data-sub element
   }
 });
 </script>
-<div data-module="dismissable">
-  This is dismissable <a href="#" data-bind="close">&times;</a>
+<div data-super="dismissable">
+  This is dismissable <a href="#" data-sub="close">&times;</a>
 </div>
-<div data-module="dismissable">
-  This is also <a href="#" data-bind="alert" data-message="Hello World"><strong>dismissable</strong></a>. <a href="#" data-bind="close">Close</a>
+<div data-super="dismissable">
+  This is also <a href="#" data-sub="alert" data-message="Hello World"><strong>dismissable</strong></a>. <a href="#" data-sub="close">Close</a>
 </div>
 ```
 
-### Extended jQuery Event object
-The standard jQuery Event object will have a few more properties available in every event.
+### Event object
+An Event object will have a few more properties available inside its event handler.
 
 #### Event.super
 
-`Event.super` will point to the parent `data-module` element inside each event.
+`Event.super` will point to the parent `data-super` element.
 
 #### Event.data
-This will be the 3rd argument when `Superdelegate.register` was called. See the example for `Event.instanceData`
+This will be the 3rd argument of `Superdelegate.register` for the corresponding superdelegate. See the example for `Event.instanceData`
 
 #### Event.instanceData
-`Event.instanceData` will be available if the parent `data-module` element has a `data-id` attribute. You can use this to maintain a separate data object per unique `data-id`. See example below.
+`Event.instanceData` will be available if the parent `data-super` element has a `data-id` attribute. You can use this to maintain a separate data object per unique `data-id`. See example below.
 
 Example:
 ```html
-<div data-module="dialog" data-id="1">
- <label>Your name: <input type="text" name="name" data-bind="name" /></label> <button type="button" data-bind="say-name">Say hello</button>
+<div data-super="dialog" data-id="1">
+ <label>Your name: <input type="text" name="name" data-sub="name" /></label> <button type="button" data-sub="say-name">Say hello</button>
 </div>
-<div data-module="dialog" data-id="2">
- <label>Another name: <input type="text" name="name" data-bind="name" /></label> <button type="button" data-bind="say-name">Say hello</button>
+<div data-super="dialog" data-id="2">
+ <label>Another name: <input type="text" name="name" data-sub="name" /></label> <button type="button" data-sub="say-name">Say hello</button>
 </div>
-<div data-module="dialog" data-id="1">
-  <button type="button" data-bind="say-name">Say hello to yourself from somewhere else</button>
+<div data-super="dialog" data-id="1">
+  <button type="button" data-sub="say-name">Say hello to yourself from somewhere else</button>
 </div>
 
 <script>
@@ -74,7 +73,7 @@ Superdelegate.register("dialog", {
 
 ### Superdelegate events
 
-You can also pass events to be handled by the superdelegate element by omitting the dash and subdelegate name in the event map. Inside these events, `this` will point to the `data-module` element.
+You can also pass events to be handled by the superdelegate element by omitting the dash and subdelegate name in the event map. Inside these events, `this` will point to the `data-super` element.
 
 Example:
 ```html
@@ -88,7 +87,7 @@ Superdelegate.register("test-module", {
   }
 });
 </script>
-<div data-module="test-module" style="padding:20px;background-color:#F00;">
-  <div data-bind="child" style="padding:20px;"></div>
+<div data-super="test-module" style="padding:20px;background-color:#F00;">
+  <div data-sub="child" style="padding:20px;"></div>
 </div>
 ```
