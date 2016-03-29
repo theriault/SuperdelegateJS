@@ -1,5 +1,5 @@
 /**
- * Superdelegate v0.1.0
+ * Superdelegate v0.3.0
  * Copyright (c) 2016 Theriault
  */
 ;(function (root, doc) {
@@ -7,38 +7,56 @@
 	var eventRegister = {};
 	var modules = {};
 	var options = {"superdelegate": "super", "subdelegate": "sub"};
-	var listener = function (e) {
+	var delegationHandle = function (e) {
+		if (e._delegation && e._delegation.eventSub) {
+			modules[e._delegation.super].handles[e._delegation.eventSub].call(e.sub, e);
+		}
+		if (e._delegation && e._delegation.eventSuper) {
+			modules[e._delegation.super].handles[e._delegation.eventSuper].call(e.super, e);
+		}
+		if (!e.bubbles) {
+			e.target.removeEventListener(e.type, delegationHandle, false);
+		}
+	};
+	var captureEventHandle = function (e) {
+		e.preventDelegation = function () {
+			e._delegation = null;
+		};
 		var p = e.target;
 		var subdelegate = null, subdelegateAttr = null, superdelegate = null, superdelegateAttr = null;
-		do {
+		while (p.parentNode) {
 			if (subdelegate === null) {
 				subdelegateAttr = p.getAttribute("data-" + options.subdelegate);
-				if (subdelegateAttr) {
+				if (subdelegateAttr !== null) {
 					subdelegate = p;
 				}
 			}
 			if (superdelegate === null) {
 				superdelegateAttr = p.getAttribute("data-" + options.superdelegate);
-				if (superdelegateAttr) {
+				if (superdelegateAttr !== null) {
 					superdelegate = p;
+					break;
 				}
 			}
-			if (superdelegate !== null) {
-				break;
-			}
 			p = p.parentNode;
-		} while (p.parentNode);
+		}
 		if (superdelegate === null) return;
 		if (!(superdelegateAttr in modules)) return;
 		var mod = modules[superdelegateAttr];
-		e.super = superdelegate;
-		if (subdelegate !== null) {
-			var eventName = e.type + "-" + subdelegateAttr;
-			var target = subdelegate;
-		} else {
-			var eventName = e.type;
-			var target = superdelegate;
+			
+		var eventSub = subdelegate !== null ? e.type + "-" + subdelegateAttr : "";
+		var eventSuper = e.type;
+		
+		var hasSub = eventSub in mod.handles;
+		var hasSuper = eventSuper in mod.handles;
+		
+		if (!hasSub && !hasSuper) {
+			return;
 		}
+		
+		e.sub = subdelegate;
+		e.super = superdelegate;
+
 		var id = superdelegate.getAttribute("data-id") || "";
 		if (id.length) {
 			if (!(id in mod.instanceData)) {
@@ -46,12 +64,27 @@
 			}
 			e.instanceData = mod.instanceData[id];
 		}
+		
 		if ("data" in mod) {
 			e.data = mod.data;
 		}
-		if (eventName in mod.handles) {
-			return mod.handles[eventName].call(target, e);
+		
+		e._delegation = {
+			"super": superdelegateAttr,
+			"sub": subdelegateAttr
+		};
+		if (hasSub) {
+			e._delegation.eventSub = eventSub;
 		}
+		if (hasSuper) {
+			e._delegation.eventSuper = eventSuper;
+		}
+		if (!e.bubbles) {
+			e.target.addEventListener(e.type, delegationHandle, false);
+		}
+	};
+	var bubbleEventHandle = function (e) {
+		delegationHandle(e);
 	};
 	Superdelegate.option = function (name, value) {
 		if (value === undefined) {
@@ -70,7 +103,8 @@
 			if (i in eventRegister) {
 				eventRegister[i][name] = true;
 			} else {
-				doc.addEventListener(i, listener);
+				root.document.addEventListener(i, captureEventHandle, true);
+				root.document.addEventListener(i, bubbleEventHandle, false);
 				eventRegister[i] = {};
 				eventRegister[i][name] = true;
 			}
@@ -102,7 +136,8 @@
 					break;
 				}
 				if (!has) {
-					doc.removeEventListener(i, listener);
+					root.document.removeEventListener(i, captureEventHandle, true);
+					root.document.removeEventListener(i, bubbleEventHandle, false);
 				}
 			}
 		}
@@ -111,4 +146,4 @@
 	};
 	
 	root.Superdelegate = Superdelegate;
-})(window, document);
+})(window);
