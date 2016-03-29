@@ -1,8 +1,8 @@
 /**
- * Superdelegate v0.3.0
+ * Superdelegate v0.4.0
  * Copyright (c) 2016 Theriault
  */
-;(function (root, doc) {
+;(function (root) {
 	var Superdelegate = {};
 	var eventRegister = {};
 	var modules = {};
@@ -18,13 +18,13 @@
 			e.target.removeEventListener(e.type, delegationHandle, false);
 		}
 	};
+	var stopDelegation = function () {
+		this._delegation = null;
+	};
 	var captureEventHandle = function (e) {
-		e.stopDelegation = function () {
-			e._delegation = null;
-		};
 		var p = e.target;
 		var subdelegate = null, subdelegateAttr = null, superdelegate = null, superdelegateAttr = null;
-		while (p.parentNode) {
+		while (p) {
 			if (subdelegate === null) {
 				subdelegateAttr = p.getAttribute("data-" + options.subdelegate);
 				if (subdelegateAttr !== null) {
@@ -42,8 +42,12 @@
 		}
 		if (superdelegate === null) return;
 		if (!(superdelegateAttr in modules)) return;
+		
+		// delegation is possible, allow stopping it
+		e.stopDelegation = stopDelegation;
+		
 		var mod = modules[superdelegateAttr];
-			
+		
 		var eventSub = subdelegate !== null ? e.type + "-" + subdelegateAttr : "";
 		var eventSuper = e.type;
 		
