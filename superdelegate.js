@@ -1,5 +1,5 @@
 /**
- * Superdelegate v0.4.0
+ * Superdelegate v0.4.1
  * Copyright (c) 2016 Theriault
  */
 ;(function (root) {
@@ -24,7 +24,7 @@
 	var captureEventHandle = function (e) {
 		var p = e.target;
 		var subdelegate = null, subdelegateAttr = null, superdelegate = null, superdelegateAttr = null;
-		while (p) {
+		while (p.getAttribute) {
 			if (subdelegate === null) {
 				subdelegateAttr = p.getAttribute("data-" + options.subdelegate);
 				if (subdelegateAttr !== null) {
