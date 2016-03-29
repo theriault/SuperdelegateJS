@@ -1,5 +1,5 @@
 # SuperdelegateJS
-Super delegation for Javascript.
+Super delegation for Javascript &mdash; delegate all events including ones that don't bubble.
 
 ## How to use it
 Include superdelegate.js:
@@ -13,7 +13,7 @@ Superdelegate.register(name, eventMap[, data]);
 Argument | Description
 ---------|------------
 `name` | Unique name of the superdelegate to register. This will be delegated through `data-super` in your HTML. 
-`eventMap` | Map of events where the keys are an event type (`click`, `mousedown`, `keydown`, `focusout`, etc.), followed by a dash, followed by a subdelegate name (which will be delegated through `data-sub` in your HTML). The dash and subdelegate name may be omitted to provide an event handler directly for the `data-super` element.
+`eventMap` | Map of events where the keys are an event type (`click`, `mousedown`, `keydown`, `blur`, `submit`, `load`, `focusout`, etc.), followed by a dash, followed by a subdelegate name (which will be delegated through `data-sub` in your HTML). The dash and subdelegate name may be omitted to provide an event handler directly for the `data-super` element.
 `data` | Optional argument that will be passed through to all event handlers via `Event.data`
 
 Example usage:
@@ -40,6 +40,9 @@ Superdelegate.register("dismissable", {
 ### Event object
 Each event handler's Event object will be augmented with the following properties.
 
+#### Event.stopDelegation()
+Call `Event.stopDelegation` to prevent the delegation events from happening. This also happens if `Event.stopPropagation` is called on events that bubble or `Event.stopImmediatePropagation` is called on events that don't bubble.
+
 #### Event.super
 
 `Event.super` will point to the parent `data-super` element.
@@ -64,7 +67,7 @@ Example:
 
 <script>
 Superdelegate.register("dialog", {
-  "focusout-name": function (e) {
+  "blur-name": function (e) {
     e.data.lastName = this.value;
     e.instanceData.name = this.value; 
   },
@@ -77,7 +80,7 @@ Superdelegate.register("dialog", {
 
 ### Superdelegate event handlers
 
-You can also pass event handlers for the superdelegate element itself by omitting the dash and subdelegate name in the event map. Inside these event handlers, `this` will point to the `data-super` element.
+You can also pass event handlers for the superdelegate itself by omitting the dash and subdelegate name in the event map. Inside these event handlers, `this` will point to the `data-super` element. If a subdelegate event calls `Event.stopDelegation` though, then the superdelegate event will not be called.
 
 Example:
 ```html
