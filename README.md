@@ -10,7 +10,11 @@ Register a superdelegate:
 ```javascript
 Superdelegate.register(name, eventMap[, data]);
 ```
-`name` is the unique name of the superdelegate to register (which will be delegated through `data-super` in your HTML). `eventMap` is a map of events where the keys are an event type (`click`, `focusout`, `keydown`, etc.), followed by a dash, followed by a subdelegate name (which will be delegated through `data-sub` in your HTML). The values of `eventMap` are the event handlers. The first argument passed to each event handler will be an augmented Event object. Inside the event handlers, `this` will point to the `data-sub` element. `data` is an optional third argument - its value will be exposed to all event handlers through `Event.data`
+Argument | Description
+---------|------------
+`name` | Unique name of the superdelegate to register. This will be delegated through `data-super` in your HTML. 
+`eventMap` | Map of events where the keys are an event type (`click`, `mousedown`, `keydown`, `focusout`, etc.), followed by a dash, followed by a subdelegate name (which will be delegated through `data-sub` in your HTML). The dash and subdelegate name may be omitted to provide an event handler directly for the `data-super` element.
+`data` | Optional argument that will be passed through to all event handlers via `Event.data`
 
 Example usage:
 ```html
