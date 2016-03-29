@@ -19,7 +19,7 @@
 		}
 	};
 	var captureEventHandle = function (e) {
-		e.preventDelegation = function () {
+		e.stopDelegation = function () {
 			e._delegation = null;
 		};
 		var p = e.target;
