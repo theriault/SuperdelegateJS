@@ -21,7 +21,7 @@ Example usage:
 <script>
 Superdelegate.register("dismissable", {
   "click-close": function (e) {
-    $(e.super).remove(); // 'e.super' points to the data-super element
+    e.super.parentNode.removeChild(e.super); // 'e.super' points to the data-super element
     return false;
   },
   "click-alert": function (e) {
